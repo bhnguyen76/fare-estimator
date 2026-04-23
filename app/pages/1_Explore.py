@@ -268,8 +268,8 @@ with tab4:
             priciest_q = quarterly_means.idxmax()
             st.markdown(
                 f"**Insight:** on this route, **Q{cheapest_q}** is typically cheapest "
-                f"(${quarterly_means[cheapest_q]:.0f} avg) and **Q{priciest_q}** is "
-                f"priciest (${quarterly_means[priciest_q]:.0f} avg)."
+                f"(\\${quarterly_means[cheapest_q]:.0f} avg) and **Q{priciest_q}** is "
+                f"priciest (\\${quarterly_means[priciest_q]:.0f} avg)."
             )
 
 st.markdown("---")
