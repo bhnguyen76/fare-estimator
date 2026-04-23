@@ -34,9 +34,40 @@ h1, h2, h3 {
     color: #0c4a6e;
 }
 
-/* Sidebar: subtle tint */
+/* Sidebar: darker background so nav links stand out */
 [data-testid="stSidebar"] {
-    background-color: #f8fafc;
+    background-color: #0c4a6e;
+}
+
+/* Sidebar text */
+[data-testid="stSidebar"] * {
+    color: #e0f2fe !important;
+}
+
+/* Nav link default */
+[data-testid="stSidebarNavLink"] {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0.2rem;
+    transition: background 0.15s ease;
+}
+
+/* Nav link hover */
+[data-testid="stSidebarNavLink"]:hover {
+    background-color: rgba(255,255,255,0.12) !important;
+}
+
+/* Active nav link */
+[data-testid="stSidebarNavLink"][aria-current="page"] {
+    background-color: rgba(255,255,255,0.2) !important;
+    font-weight: 700 !important;
+}
+
+/* Nav link label text */
+[data-testid="stSidebarNavLink"] span {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
 }
 
 /* Buttons: less bouncy */

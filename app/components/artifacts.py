@@ -53,14 +53,15 @@ def load_artifacts(path: str = "data/us_flight_fare_artifacts.pkl"):
     """Load the pickle once per session. Cached across reruns."""
     p = Path(path)
     if not p.exists():
-        # Try sibling data/ dir relative to app root
         p = Path(__file__).parent.parent / path
     if not p.exists():
+        # Try pipeline/artifacts relative to project root
+        p = Path(__file__).parent.parent.parent / "pipeline" / "artifacts" / "us_flight_fare_artifacts.pkl"
+    if not p.exists():
         st.error(
-            f"❌ Could not find artifact file at `{path}`.\n\n"
-            f"Generate it by running the notebook (§12 saves "
-            f"`us_flight_fare_artifacts.pkl`), then copy it to "
-            f"`streamlit_app/data/us_flight_fare_artifacts.pkl`."
+            f"❌ Could not find artifact file.\n\n"
+            f"Expected at `pipeline/artifacts/us_flight_fare_artifacts.pkl` "
+            f"relative to the project root. Generate it by running the notebook (§12)."
         )
         st.stop()
 
