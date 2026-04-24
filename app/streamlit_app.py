@@ -79,8 +79,6 @@ with left:
     with col_q:
         quarter_label = st.selectbox("Quarter", options=list(QUARTER_LABELS.keys()), index=1)
 
-    run = st.button("Estimate Fare", type="primary", use_container_width=True)
-
 with right:
     st.subheader("Result")
 
