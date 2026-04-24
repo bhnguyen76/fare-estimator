@@ -180,7 +180,7 @@ chart_data['series'] = chart_data['series'].map({
     'predicted_forecast': 'Model prediction (trained ≤2023)',
 })
 
-colors = ['#111827', '#dc2626']
+colors = ['#f8fafc', '#dc2626']
 forecast_chart = alt.Chart(chart_data).mark_line(
     strokeWidth=2.5, point=True
 ).encode(
