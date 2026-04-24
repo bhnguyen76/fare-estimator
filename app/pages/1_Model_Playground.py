@@ -361,24 +361,40 @@ with tab3:
     else:
         def _response_chart(x_vals, x_col, x_title, p_sel, p_ref,
                             x_fmt=',.0f', x_axis_fmt=None):
-            n = len(x_vals)
-            sel_df = pd.DataFrame({'x': x_vals, 'predicted_fare': p_sel})
-            ref_df = pd.DataFrame({'x': x_vals, 'predicted_fare': p_ref})
+            sel_df = pd.DataFrame({'x': x_vals, 'predicted_fare': p_sel, 'carrier': sel_name})
+            ref_df = pd.DataFrame({'x': x_vals, 'predicted_fare': p_ref, 'carrier': ref_name + ' (reference)'})
+            combined = pd.concat([sel_df, ref_df], ignore_index=True)
 
             x_enc = alt.X('x:Q', title=x_title,
                            axis=alt.Axis(format=x_axis_fmt) if x_axis_fmt else alt.Axis())
             y_enc = alt.Y('predicted_fare:Q', title='Predicted Fare ($)',
                           scale=alt.Scale(zero=False))
+
+            color_enc = alt.Color(
+                'carrier:N',
+                scale=alt.Scale(
+                    domain=[sel_name, ref_name + ' (reference)'],
+                    range=[C_PREDICTED, C_GRAY],
+                ),
+                legend=alt.Legend(orient='top', title=None),
+            )
+            dash_enc = alt.StrokeDash(
+                'carrier:N',
+                scale=alt.Scale(
+                    domain=[sel_name, ref_name + ' (reference)'],
+                    range=[[1, 0], [6, 3]],
+                ),
+                legend=None,
+            )
             tt = [
+                alt.Tooltip('carrier:N', title='Carrier'),
                 alt.Tooltip('x:Q', title=x_title, format=x_fmt),
                 alt.Tooltip('predicted_fare:Q', title='Predicted fare', format='$,.2f'),
             ]
-            line_sel = (alt.Chart(sel_df).mark_line(color=C_PREDICTED, strokeWidth=2.5)
-                        .encode(x=x_enc, y=y_enc, tooltip=tt))
-            line_ref = (alt.Chart(ref_df).mark_line(color=C_GRAY, strokeWidth=2,
-                                                     strokeDash=[6, 3])
-                        .encode(x=x_enc, y=y_enc, tooltip=tt))
-            return (line_sel + line_ref).properties(height=350)
+            chart = (alt.Chart(combined)
+                     .mark_line(strokeWidth=2.5)
+                     .encode(x=x_enc, y=y_enc, color=color_enc, strokeDash=dash_enc, tooltip=tt))
+            return chart.properties(height=350)
 
         sub1, sub2, sub3 = st.tabs(["vs Distance", "vs Year", "vs Market Share"])
 
