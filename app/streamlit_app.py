@@ -31,7 +31,7 @@ col_title, col_badge = st.columns([3, 1])
 with col_title:
     st.title("✈️ US Fare Atlas")
     st.caption("Estimate historical US domestic airfares using a tuned "
-               "HistGradientBoosting model trained on DOT + EIA + BLS data.")
+               "Random Forest model trained on DOT + EIA + BLS data.")
 with col_badge:
     st.markdown(
         "<div style='text-align:right; padding-top:1.2rem;'>"
@@ -189,6 +189,6 @@ out-of-sample years — see the **About the Model** page for the full analysis.
 
 st.caption(
     "Data: DOT Consumer Airfare Report (primary) · EIA Jet Fuel Spot Prices · BLS CPI · "
-    "Model: HistGradientBoostingRegressor (scikit-learn) · "
+    "Model: RandomForestRegressor (scikit-learn) · "
     "Built for CS 451 Final Project."
 )

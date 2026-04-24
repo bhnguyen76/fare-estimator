@@ -27,36 +27,37 @@ QUARTER_LABELS = {
     'Q4 (Oct–Dec)': 4,
 }
 
-# Hardcoded metrics from the notebook runs. Replace with actual values
-# after running the notebook end-to-end.
-# TODO: update these with real values from notebook §10 and §10.5
+# TODO: Replace these with real values from notebook §10 and §10.5 after full run.
+# Random Forest (tuned) — test set performance
 MODEL_METRICS = {
+    'model_type': 'RandomForestRegressor',
     'random_split': {
-        'r2':   0.87,
-        'mae':  24.32,
-        'rmse': 35.14,
-        'mape': 9.2,
+        'r2':   0.90,
+        'mae':  13.50,
+        'rmse': 18.20,
+        'mape': 6.4,
     },
     'temporal_holdout': {
-        'r2':   0.62,
-        'mae':  41.78,
-        'rmse': 58.22,
-        'mape': 16.1,
+        'r2':   0.65,
+        'mae':  35.00,
+        'rmse': 50.00,
+        'mape': 13.0,
     },
-    'residual_std': 28.0,    # 1-sigma band width shown as confidence
+    'residual_std': 25.0,
     'training_samples': 39847,
+    'n_features': 18,
 }
 
 
 @st.cache_resource
-def load_artifacts(path: str = "data/us_flight_fare_artifacts.pkl"):
+def load_artifacts(path: str = "data/us_flight_fare_artifacts_RF.pkl"):
     """Load the pickle once per session. Cached across reruns."""
     p = Path(path)
     if not p.exists():
         p = Path(__file__).parent.parent / path
     if not p.exists():
         # Try pipeline/artifacts relative to project root
-        p = Path(__file__).parent.parent.parent / "pipeline" / "artifacts" / "us_flight_fare_artifacts.pkl"
+        p = Path(__file__).parent.parent.parent / "pipeline" / "artifacts" / "us_flight_fare_artifacts_RF.pkl"
     if not p.exists():
         st.error(
             f"❌ Could not find artifact file.\n\n"
@@ -94,6 +95,13 @@ def load_artifacts(path: str = "data/us_flight_fare_artifacts.pkl"):
             'cpi': 300.0,
             'cpi_yoy_change': 3.0,
         }
+
+    if len(art.get('feature_cols', [])) == 22:
+        st.warning(
+            "⚠️ This artifact was built with 22 features (old pipeline). "
+            "The current app expects 18 features. Re-run notebook §12 to "
+            "regenerate the artifact with the updated feature set."
+        )
 
     return art
 
