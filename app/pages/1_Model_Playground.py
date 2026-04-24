@@ -40,7 +40,7 @@ if history_df.empty:
     )
 
 # Color conventions (consistent across all tabs per spec)
-C_ACTUAL    = '#111827'
+C_ACTUAL    = '#f8fafc'
 C_PREDICTED = '#dc2626'
 C_AMBER     = '#f59e0b'
 C_BLUE      = '#2563eb'
@@ -92,8 +92,8 @@ with tab1:
     st.subheader("Where does the model agree with reality?")
     st.caption(
         "Top routes by passenger volume. Bar length = mean actual fare. "
-        "Color = model residual (actual − predicted): red = model under-predicts, "
-        "blue = model over-predicts."
+        "Color = model residual (actual − predicted): blue = model under-predicts, "
+        "red = model over-predicts."
     )
 
     col_n, col_sort = st.columns([1, 2])
@@ -179,7 +179,7 @@ with tab2:
     st.subheader("Actual vs predicted fare history")
     st.caption(
         "How well does the model track fare trends on specific routes over time? "
-        "Black solid = actual, red dashed = model prediction."
+        "White solid = actual, red dashed = model prediction."
     )
 
     col_a, col_b = st.columns(2)
