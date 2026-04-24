@@ -28,7 +28,7 @@ st.markdown("---")
 # ============================================================
 st.markdown("""
 This model estimates average quarterly airfares for US domestic routes using a
-**HistGradientBoostingRegressor** trained on the DOT Consumer Airfare Report
+**RandomForestRegressor** trained on the DOT Consumer Airfare Report
 (2010–2025), enriched with macroeconomic signals from the EIA (jet fuel prices)
 and BLS (Consumer Price Index).
 
@@ -68,31 +68,25 @@ st.subheader("What drives fare estimates")
 st.caption("Permutation importance: how much MAE worsens when each feature is randomly shuffled at test time. "
            "Unlike tree impurity importance, this measures actual causal contribution to predictions.")
 
-# Hardcoded feature importance — update from notebook §9 output
-# TODO: export these from the notebook's permutation_importance run
 feature_importance = pd.DataFrame([
-    {'feature': 'nsmiles',                'importance': 0.34},
-    {'feature': 'passengers',             'importance': 0.12},
-    {'feature': 'large_ms',               'importance': 0.09},
-    {'feature': 'jet_fuel_usd_per_gal',   'importance': 0.07},
-    {'feature': 'carrier_lg_enc',         'importance': 0.06},
-    {'feature': 'cpi',                    'importance': 0.05},
-    {'feature': 'route_popularity',       'importance': 0.05},
-    {'feature': 'Year',                   'importance': 0.04},
-    {'feature': 'city1_freq',             'importance': 0.03},
-    {'feature': 'city2_freq',             'importance': 0.03},
-    {'feature': 'carrier_tier',           'importance': 0.03},
-    {'feature': 'log_distance',           'importance': 0.03},
-    {'feature': 'distance_bucket',        'importance': 0.02},
-    {'feature': 'log_passengers',         'importance': 0.02},
-    {'feature': 'quarter',                'importance': 0.01},
-    {'feature': 'quarter_sin',            'importance': 0.01},
-    {'feature': 'quarter_cos',            'importance': 0.01},
-    {'feature': 'is_long_haul',           'importance': 0.005},
-    {'feature': 'is_covid_era',           'importance': 0.005},
-    {'feature': 'cpi_yoy_change',         'importance': 0.005},
-    {'feature': 'jet_fuel_lag_1q',        'importance': 0.003},
-    {'feature': 'jet_fuel_yoy_change',    'importance': 0.002},
+    {'feature': 'nsmiles',              'importance': 31.057},
+    {'feature': 'passengers',           'importance': 14.900},
+    {'feature': 'carrier_tier',         'importance': 10.847},
+    {'feature': 'city2_freq',           'importance': 8.661},
+    {'feature': 'city1_freq',           'importance': 8.598},
+    {'feature': 'Year',                 'importance': 5.248},
+    {'feature': 'large_ms',             'importance': 4.204},
+    {'feature': 'route_popularity',     'importance': 3.904},
+    {'feature': 'jet_fuel_lag_1q',      'importance': 3.842},
+    {'feature': 'is_covid_era',         'importance': 3.822},
+    {'feature': 'cpi',                  'importance': 2.363},
+    {'feature': 'carrier_lg_enc',       'importance': 2.264},
+    {'feature': 'jet_fuel_usd_per_gal', 'importance': 1.220},
+    {'feature': 'jet_fuel_yoy_change',  'importance': 0.877},
+    {'feature': 'quarter_sin',          'importance': 0.460},
+    {'feature': 'quarter_cos',          'importance': 0.364},
+    {'feature': 'cpi_yoy_change',       'importance': 0.273},
+    {'feature': 'quarter',              'importance': 0.252},
 ])
 
 fi_chart = alt.Chart(feature_importance).mark_bar(color='#0c4a6e').encode(
@@ -106,11 +100,19 @@ st.altair_chart(fi_chart, use_container_width=True)
 
 st.markdown("""
 **Takeaways:**
-- **`nsmiles`** (distance) dominates — unsurprising; fare and distance are tightly coupled.
-- **External features (`jet_fuel_usd_per_gal`, `cpi`) rank within the top 6**, confirming
-  that macroeconomic signals genuinely contribute beyond route-level DOT data.
-- **`route_popularity`** (the leakage-safe feature computed on train data only) matters
-  meaningfully, showing the model learns route-specific baseline fares.
+- **`nsmiles`** (distance) dominates at $31 drop in MAE — more than double any
+  other single feature.
+- **`passengers`, `carrier_tier`, `city_freq`** form the next tier, reflecting
+  route demand and competitive market structure.
+- **External features** (`jet_fuel_lag_1q` $3.84, `cpi` $2.36) contribute real
+  signal, consistent with fuel being ~25% of airline operating costs. The lag
+  feature outranks the spot price, reflecting that fare adjustments trail fuel
+  cost changes by roughly one quarter.
+- **`is_covid_era`** ranks surprisingly high ($3.82), showing the model picked
+  up a genuine structural break in fare levels during 2020-2021.
+- **4 features were dropped** (`log_distance`, `log_passengers`, `is_long_haul`,
+  `distance_bucket`) — all showed near-zero permutation importance because
+  Random Forest learns nonlinear distance relationships directly from `nsmiles`.
 """)
 
 # ============================================================
@@ -249,11 +251,11 @@ BTS's session-based download protocol not fitting our time budget.
 with st.expander("3. Feature engineering", expanded=False):
     st.markdown("""
 **13 engineered features** (8 DOT-derived, 5 external passthrough) plus the original
-DOT fields and categorical encodings = 22 total model features.
+DOT fields and categorical encodings = 18 total model features (22 minus 4 dropped after permutation importance).
 
-DOT-derived: log transforms for distance/passengers, long-haul flag, distance bucket,
-cyclical quarter encoding (sin/cos), COVID-era indicator, carrier tier (legacy/LCC/ULCC/regional),
-train-only route popularity (avoids target leakage).
+DOT-derived: cyclical quarter encoding (sin/cos), COVID-era indicator, carrier tier (legacy/LCC/ULCC/regional),
+train-only route popularity (avoids target leakage). Log transforms and distance-bucket features were dropped
+after permutation importance showed near-zero contribution.
 
 External passthrough: jet fuel spot price, 1-quarter fuel lag, fuel YoY change, CPI, CPI YoY change.
 
@@ -265,15 +267,18 @@ with st.expander("4. Modeling & hyperparameter tuning", expanded=False):
     st.markdown("""
 **Three model families compared:**
 - **Ridge regression** (linear, L2-regularized) — sanity-check baseline
-- **Random Forest** (bagging ensemble)
-- **HistGradientBoosting** (boosting ensemble) — winner
+- **Random Forest** (bagging ensemble) — winner
+- **HistGradientBoosting** (boosting ensemble)
 
-All evaluated with 5-fold cross-validation on the training set for confidence-interval-style
-variance. HGB chosen based on lowest CV MAE.
+**Random Forest** (bagging ensemble) outperformed HistGradientBoosting at
+baseline (RF validation MAE $13.76 vs HistGB $14.77) and was selected for
+tuning. This is somewhat unusual — boosting typically edges bagging on tabular
+data — but consistent with our dataset having low noise (quarterly government
+aggregates), which reduces the advantage of sequential error correction.
 
 **Hyperparameter tuning:** RandomizedSearchCV with 20 iterations × 5-fold CV
-(100 total fits) over learning_rate, max_iter, max_leaf_nodes, min_samples_leaf,
-l2_regularization.
+(100 total fits) over n_estimators, max_depth, min_samples_split, min_samples_leaf,
+max_features.
 
 **Evaluation:** train/validation/test = 60/20/20. Val used for model selection,
 test held out until final report.
@@ -283,8 +288,10 @@ with st.expander("5. Feature selection", expanded=False):
     st.markdown("""
 **Permutation importance** on the tuned model. Unlike impurity-based importance
 (biased toward high-cardinality features), permutation importance measures the
-actual drop in validation MAE when each feature is shuffled. No features were
-removed — all showed non-trivial contribution.
+actual drop in validation MAE when each feature is shuffled. Four features were
+removed after showing near-zero contribution: `log_distance`, `log_passengers`,
+`is_long_haul`, and `distance_bucket`. Random Forest learns nonlinear distance
+relationships directly from `nsmiles`, making the derived distance features redundant.
 """)
 
 # ============================================================
@@ -302,7 +309,7 @@ st.markdown("""
 
 All three sources are public domain (US government data). No proprietary data or PII.
 
-**Model:** scikit-learn `HistGradientBoostingRegressor`, tuned via `RandomizedSearchCV`.
+**Model:** scikit-learn `RandomForestRegressor`, tuned via `RandomizedSearchCV`.
 **Frontend:** Streamlit + Altair.
 **Built for:** CS 451 Introduction to Data Science — Final Project.
 """)
