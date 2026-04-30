@@ -5,6 +5,7 @@ HistGradientBoostingRegressor trained on DOT, EIA, and BLS data.
 Select an origin, destination, airline, year, and quarter to get a fare
 estimate with a confidence band and historical fare chart. Built for CS 451.
 
+**Make sure your computer is in dark mode. You will not be able to see some graph lines in light mode.**
 ## Pages
 
 | Page | Description |

@@ -12,11 +12,6 @@ __pycache__/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Data & artifacts (large files — keep only source notebooks)
-pipeline/artifacts/*.pkl
-pipeline/artifacts/*.csv
-pipeline/artifacts/*.json
-
 # Streamlit cache
 .streamlit/
 
@@ -33,3 +28,4 @@ Thumbs.db
 # Env files
 .env
 .env.*
+pipeline/artifacts/*.pkl

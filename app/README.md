@@ -1,7 +1,7 @@
 # US Fare Atlas — Streamlit App
 
 Interactive dashboard for estimating US domestic airfares using a
-HistGradientBoostingRegressor trained on DOT + EIA + BLS data.
+RandomForest model trained on DOT + EIA + BLS data.
 
 **This is an estimator, not a forecaster.** The model performs cross-sectional
 estimation — filling in historical route-carrier-quarter fare patterns. It
@@ -12,7 +12,7 @@ full temporal-holdout analysis.
 
 1. **Estimator** (landing) — interactive fare estimation with confidence band,
    route context, historical fare chart.
-2. **📊 Explore** — top routes, route comparator, carrier profile, seasonality heatmap.
+2. **📊 Model Playground** — top routes, route comparator, carrier profile, seasonality heatmap.
 3. **🔬 About the Model** — performance metrics, feature importance, forecasting
    failure analysis, methodology writeup.
 
@@ -20,8 +20,8 @@ full temporal-holdout analysis.
 
 ### 1. Generate artifacts from the notebook
 
-Run the notebook (`Final_Project_USA_v3.ipynb`) end-to-end. The last deployment
-cell (§12) saves `us_flight_fare_artifacts.pkl`. Copy it into the app's data dir:
+Run the notebook (`Final_Project_USA_RF.ipynb`) end-to-end. The last deployment
+cell (§12) saves `us_flight_fare_artifacts_RF.pkl`. Copy it into the app's data dir (should also work stragith from artifacts):
 
 ```bash
 cp us_flight_fare_artifacts.pkl streamlit_app/data/
