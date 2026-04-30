@@ -29,6 +29,20 @@ make run     # start the app at http://localhost:8501
 | `make install` | Install/update dependencies from `app/requirements.txt` |
 | `make setup` | Create `.venv` from scratch and install dependencies |
 
+## Model Artifact Setup
+
+The trained model artifact (`us_flight_fare_artifacts.pkl`) is too large for GitHub and must be downloaded separately.
+
+1. Download the file from Google Drive:
+   [us_flight_fare_artifacts.pkl](https://drive.google.com/file/d/1QupFF9y3VRlEOfmaOC-TtXGWO_z9EE3k/view?usp=drive_link)
+
+2. Place the file at:
+   ```
+   pipeline/artifacts/us_flight_fare_artifacts.pkl
+   ```
+
+3. The app will not run without this file — it must be in that exact location.
+
 ## Project Structure
 
 ```
