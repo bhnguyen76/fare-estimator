@@ -28,4 +28,4 @@ Thumbs.db
 # Env files
 .env
 .env.*
-pipeline/artifacts/*.pkl
+
